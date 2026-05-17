@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, BarChart, Bar
 } from "recharts";
 import {
   TrendingUp, TrendingDown, DollarSign, Activity, AlertTriangle,
-  Shield, BarChart2, Users, User, ChevronRight, Bell, BellOff,
+  Shield, BarChart2, Users, User, Bell, BellOff,
   Power, PowerOff, Info, X, Menu
 } from "lucide-react";
 import "./App.css";
 
-// ── MOCK ACCOUNTS DATA ────────────────────────────────────────────
 const ACCOUNTS = [
   {
     id: 1,
@@ -136,11 +135,9 @@ const ACCOUNTS = [
   },
 ];
 
-// ── HELPERS ───────────────────────────────────────────────────────
 const fmt = (n) => `$${Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const pct = (n) => `${Number(n).toFixed(2)}%`;
 
-// ── STAT CARD ─────────────────────────────────────────────────────
 function StatCard({ label, value, sub, icon: Icon, color, positive }) {
   return (
     <div className={`stat-card stat-card--${color}`}>
@@ -154,7 +151,6 @@ function StatCard({ label, value, sub, icon: Icon, color, positive }) {
   );
 }
 
-// ── INSTRUCTION BANNER ────────────────────────────────────────────
 function InstructionBanner({ onClose }) {
   return (
     <div className="instruction">
@@ -168,7 +164,6 @@ function InstructionBanner({ onClose }) {
   );
 }
 
-// ── ACCOUNT CARD (sidebar) ────────────────────────────────────────
 function AccountCard({ acc, selected, onClick }) {
   const profit = acc.Profit_Per >= 0;
   return (
@@ -191,11 +186,10 @@ function AccountCard({ acc, selected, onClick }) {
   );
 }
 
-// ── MAIN APP ──────────────────────────────────────────────────────
 export default function App() {
   const [accounts, setAccounts] = useState(ACCOUNTS);
   const [selectedId, setSelectedId] = useState(1);
-  const [view, setView] = useState("admin"); // "admin" | "client"
+  const [view, setView] = useState("admin");
   const [tab, setTab] = useState("overview");
   const [time, setTime] = useState(new Date());
   const [showInstruction, setShowInstruction] = useState(true);
@@ -210,26 +204,16 @@ export default function App() {
   const isProfit = acc.Profit_Per >= 0;
   const isFloating = acc.Floating_Profits >= 0;
 
-  const toggleActive = (id) => {
-    setAccounts(prev => prev.map(a => a.id === id ? { ...a, active: !a.active } : a));
-  };
+  const toggleActive = (id) => setAccounts(prev => prev.map(a => a.id === id ? { ...a, active: !a.active } : a));
+  const toggleAlert = (id) => setAccounts(prev => prev.map(a => a.id === id ? { ...a, alert: !a.alert } : a));
 
-  const toggleAlert = (id) => {
-    setAccounts(prev => prev.map(a => a.id === id ? { ...a, alert: !a.alert } : a));
-  };
-
-  // client view only shows account #1
   const visibleAccounts = view === "admin" ? accounts : accounts.filter(a => a.id === 1);
 
   return (
     <div className="app">
-
-      {/* ── HEADER ── */}
       <header className="header">
         <div className="header__left">
-          <button className="burger" onClick={() => setSidebarOpen(o => !o)}>
-            <Menu size={20} />
-          </button>
+          <button className="burger" onClick={() => setSidebarOpen(o => !o)}><Menu size={20} /></button>
           <div className="header__dot" />
           <span className="header__title">IBL <span>TRADING DASHBOARD</span></span>
         </div>
@@ -247,54 +231,30 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── INSTRUCTION BANNER ── */}
       {showInstruction && <InstructionBanner onClose={() => setShowInstruction(false)} />}
 
       <div className="layout">
-
-        {/* ── SIDEBAR ── */}
         {sidebarOpen && (
           <aside className="sidebar">
             <div className="sidebar__header">
               {view === "admin" ? `All Accounts (${accounts.length})` : "My Account"}
             </div>
             {visibleAccounts.map(a => (
-              <AccountCard
-                key={a.id}
-                acc={a}
-                selected={selectedId === a.id}
-                onClick={() => { setSelectedId(a.id); setTab("overview"); }}
-              />
+              <AccountCard key={a.id} acc={a} selected={selectedId === a.id}
+                onClick={() => { setSelectedId(a.id); setTab("overview"); }} />
             ))}
-
-            {/* Admin summary stats */}
             {view === "admin" && (
               <div className="sidebar__summary">
-                <div className="sidebar__summary-row">
-                  <span>Total Accounts</span>
-                  <strong>{accounts.length}</strong>
-                </div>
-                <div className="sidebar__summary-row">
-                  <span>Live</span>
-                  <strong className="pos">{accounts.filter(a => a.active).length}</strong>
-                </div>
-                <div className="sidebar__summary-row">
-                  <span>Offline</span>
-                  <strong className="neg">{accounts.filter(a => !a.active).length}</strong>
-                </div>
-                <div className="sidebar__summary-row">
-                  <span>Total Equity</span>
-                  <strong>{fmt(accounts.reduce((s, a) => s + a.Account_Equity, 0))}</strong>
-                </div>
+                <div className="sidebar__summary-row"><span>Total Accounts</span><strong>{accounts.length}</strong></div>
+                <div className="sidebar__summary-row"><span>Live</span><strong className="pos">{accounts.filter(a => a.active).length}</strong></div>
+                <div className="sidebar__summary-row"><span>Offline</span><strong className="neg">{accounts.filter(a => !a.active).length}</strong></div>
+                <div className="sidebar__summary-row"><span>Total Equity</span><strong>{fmt(accounts.reduce((s, a) => s + a.Account_Equity, 0))}</strong></div>
               </div>
             )}
           </aside>
         )}
 
-        {/* ── MAIN CONTENT ── */}
         <main className="main">
-
-          {/* ── ACCOUNT HEADER ── */}
           <div className="acc-header">
             <div className="acc-header__info">
               <div className="acc-header__avatar">{acc.Account_Name[0]}</div>
@@ -304,59 +264,31 @@ export default function App() {
               </div>
             </div>
             <div className="acc-header__actions">
-              <button
-                className={`action-btn ${acc.active ? "action-btn--green" : "action-btn--red"}`}
-                onClick={() => toggleActive(acc.id)}
-                title={acc.active ? "Deactivate EA" : "Activate EA"}
-              >
+              <button className={`action-btn ${acc.active ? "action-btn--green" : "action-btn--red"}`} onClick={() => toggleActive(acc.id)}>
                 {acc.active ? <Power size={15} /> : <PowerOff size={15} />}
                 {acc.active ? "EA Active" : "EA Off"}
               </button>
-              <button
-                className={`action-btn ${acc.alert ? "action-btn--gold" : "action-btn--dim"}`}
-                onClick={() => toggleAlert(acc.id)}
-                title={acc.alert ? "Disable Alerts" : "Enable Alerts"}
-              >
+              <button className={`action-btn ${acc.alert ? "action-btn--gold" : "action-btn--dim"}`} onClick={() => toggleAlert(acc.id)}>
                 {acc.alert ? <Bell size={15} /> : <BellOff size={15} />}
                 {acc.alert ? "Alerts On" : "Alerts Off"}
               </button>
             </div>
           </div>
 
-          {/* ── BALANCE BANNER ── */}
           <div className="banner">
-            <div className="banner__stat">
-              <span>Balance</span>
-              <strong>{fmt(acc.Account_Balance)}</strong>
-            </div>
+            <div className="banner__stat"><span>Balance</span><strong>{fmt(acc.Account_Balance)}</strong></div>
             <div className="banner__divider" />
-            <div className="banner__stat">
-              <span>Equity</span>
-              <strong>{fmt(acc.Account_Equity)}</strong>
-            </div>
+            <div className="banner__stat"><span>Equity</span><strong>{fmt(acc.Account_Equity)}</strong></div>
             <div className="banner__divider" />
-            <div className="banner__stat">
-              <span>Margin Level</span>
-              <strong className="pos">{pct(acc.Margin_Level)}</strong>
-            </div>
+            <div className="banner__stat"><span>Margin Level</span><strong className="pos">{pct(acc.Margin_Level)}</strong></div>
             <div className="banner__divider" />
-            <div className="banner__stat">
-              <span>Drawdown</span>
-              <strong className="neg">{pct(acc.Drawdown)}</strong>
-            </div>
+            <div className="banner__stat"><span>Drawdown</span><strong className="neg">{pct(acc.Drawdown)}</strong></div>
             <div className="banner__divider" />
-            <div className="banner__stat">
-              <span>Open Positions</span>
-              <strong>{acc.Open_Positions}</strong>
-            </div>
+            <div className="banner__stat"><span>Open Positions</span><strong>{acc.Open_Positions}</strong></div>
             <div className="banner__divider" />
-            <div className="banner__stat">
-              <span>Pending Orders</span>
-              <strong>{acc.Pending_Orders}</strong>
-            </div>
+            <div className="banner__stat"><span>Pending Orders</span><strong>{acc.Pending_Orders}</strong></div>
           </div>
 
-          {/* ── TABS ── */}
           <nav className="tabs">
             {["overview", "performance", "positions"].map(t => (
               <button key={t} className={`tab ${tab === t ? "tab--active" : ""}`} onClick={() => setTab(t)}>
@@ -365,7 +297,6 @@ export default function App() {
             ))}
           </nav>
 
-          {/* ── OVERVIEW TAB ── */}
           {tab === "overview" && (
             <div className="content">
               <div className="grid-4">
@@ -374,7 +305,6 @@ export default function App() {
                 <StatCard label="Floating P/L" value={fmt(acc.Floating_Profits)} icon={Activity} color={isFloating ? "green" : "red"} positive={isFloating} sub="Open trade exposure" />
                 <StatCard label="Last Week" value={fmt(acc.Last_Week_Profit)} icon={BarChart2} color={acc.Last_Week_Profit >= 0 ? "gold" : "red"} positive={acc.Last_Week_Profit >= 0} sub="Weekly result" />
               </div>
-
               <div className="grid-2">
                 <div className="panel">
                   <div className="panel__header">Equity Curve</div>
@@ -394,7 +324,6 @@ export default function App() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-
                 <div className="panel">
                   <div className="panel__header">Weekly Profit Breakdown</div>
                   <ResponsiveContainer width="100%" height={200}>
@@ -403,14 +332,11 @@ export default function App() {
                       <XAxis dataKey="day" stroke="#4a6a80" tick={{ fontSize: 11 }} />
                       <YAxis stroke="#4a6a80" tick={{ fontSize: 11 }} />
                       <Tooltip contentStyle={{ background: "#0a1520", border: "1px solid #0d2035", borderRadius: 8 }} />
-                      <Bar dataKey="profit" radius={[4, 4, 0, 0]}
-                        fill="#00ff88"
-                      />
+                      <Bar dataKey="profit" radius={[4, 4, 0, 0]} fill="#00ff88" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
-
               <div className="grid-2">
                 <div className="panel">
                   <div className="panel__header">Account Summary</div>
@@ -427,7 +353,6 @@ export default function App() {
                     </tbody>
                   </table>
                 </div>
-
                 <div className="panel">
                   <div className="panel__header">Live Position Snapshot</div>
                   <div className="snapshot">
@@ -445,7 +370,6 @@ export default function App() {
             </div>
           )}
 
-          {/* ── PERFORMANCE TAB ── */}
           {tab === "performance" && (
             <div className="content">
               <div className="panel">
@@ -475,7 +399,6 @@ export default function App() {
             </div>
           )}
 
-          {/* ── POSITIONS TAB ── */}
           {tab === "positions" && (
             <div className="content">
               <div className="panel">
